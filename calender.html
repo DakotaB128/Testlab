@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Calendar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #event-list {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #event-list h2 {
+            margin: 0 0 10px;
+        }
+        #event-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        #event-list li {
+            margin: 5px 0;
+            padding: 5px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #calendar {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            button {
+                font-size: 0.9rem;
+                padding: 8px 12px;
+            }
+            #event-list h2 {
+                font-size: 1.2rem;
+            }
+            #event-list li {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple Interactive Calendar</h1>
+        <div>
+            <button id="edit-mode-btn">Toggle Edit Mode</button>
+        </div>
+        <div id="calendar"></div>
+        <div id="event-list">
+            <h2>Events for <span id="selected-date">No Date Selected</span></h2>
+            <ul id="events-ul"></ul>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var eventList = document.getElementById('events-ul');
+            var selectedDateEl = document.getElementById('selected-date');
+            var editModeBtn = document.getElementById('edit-mode-btn');
+            var currentEvents = [];
+            var isEditable = false;
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                editable: true,
+                selectable: true,
+                height: 'auto',
+                events: currentEvents, // Array to hold events
+                
+                // Event adding interaction
+                dateClick: function (info) {
+                    if (!isEditable) return;
+                    selectedDateEl.textContent = info.dateStr;
+                    var title = prompt('Enter event title:');
+                    if (title) {
+                        var description = prompt('Enter event description:');
+                        var newEvent = {
+                            title: title + (description ? ' - ' + description : ''),
+                            description: description || '',
+                            start: info.dateStr,
+                            allDay: true
+                        };
+                        calendar.addEvent(newEvent);
+                        currentEvents.push(newEvent);
+                        displayEventsForDate(info.dateStr);
+                    } else {
+                        displayEventsForDate(info.dateStr);
+                    }
+                },
+            });
+
+            function displayEventsForDate(dateStr) {
+                eventList.innerHTML = '';
+                var eventsForDate = currentEvents.filter(event => event.start === dateStr);
+                if (eventsForDate.length === 0) {
+                    eventList.innerHTML = '<li>No events for this day</li>';
+                } else {
+                    eventsForDate.forEach(event => {
+                        var li = document.createElement('li');
+                        li.textContent = event.title;
+                        eventList.appendChild(li);
+                    });
+                }
+            }
+
+            // Toggle between editable and view-only mode
+            editModeBtn.addEventListener('click', function () {
+                isEditable = !isEditable;
+                alert(isEditable ? 'Edit mode enabled' : 'Edit mode disabled');
+            });
+
+            calendar.render();
+        });
+    </script>
+</body>
+</html>
